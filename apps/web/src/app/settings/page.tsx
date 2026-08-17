@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { TopNav } from '@/components/shared/top-nav';
 import { ProviderSettingsForm, type UsageLogEntry } from '@/components/settings';
 import { useProviderStore } from '@/stores/provider-store';
+import { trpc } from '@/lib/trpc/client';
 import type { ProviderId, TaskRoutingConfig, TaskType } from '@/types/provider';
-import type { ApiResponse } from '@/types/api';
 
 interface ProviderRow {
   providerId: ProviderId;
@@ -16,57 +16,45 @@ interface ProviderRow {
 
 export default function SettingsPage() {
   const { setProviderStatus } = useProviderStore();
-  const [records, setRecords] = useState<Partial<Record<ProviderId, ProviderRow>>>({});
   const [usage] = useState<UsageLogEntry[]>([]);
 
+  const listQuery = trpc.provider.list.useQuery();
+  const saveKeyMutation = trpc.provider.saveKey.useMutation();
+  const routingUpdateMutation = trpc.provider.routingUpdate.useMutation();
+
   useEffect(() => {
-    void fetch('/api/providers')
-      .then((res) => res.json())
-      .then((body: ApiResponse<ProviderRow[]>) => {
-        if (body.error) return;
-        const byId: Partial<Record<ProviderId, ProviderRow>> = {};
-        for (const row of body.data) {
-          byId[row.providerId] = row;
-          setProviderStatus({
-            providerId: row.providerId,
-            status: row.isValid === true ? 'connected' : 'invalid',
-            keyHint: row.keyHint,
-            lastValidatedAt: row.lastValidatedAt,
-          });
-        }
-        setRecords(byId);
-      })
-      .catch(() => undefined);
-  }, [setProviderStatus]);
+    for (const row of listQuery.data ?? []) {
+      const providerId = row.providerId as ProviderId;
+      setProviderStatus({
+        providerId,
+        status: row.isValid === true ? 'connected' : 'invalid',
+        keyHint: row.keyHint,
+        lastValidatedAt: row.lastValidatedAt,
+      });
+    }
+  }, [listQuery.data, setProviderStatus]);
+
+  const records = (listQuery.data ?? []).reduce<Partial<Record<ProviderId, ProviderRow>>>(
+    (acc, row) => {
+      acc[row.providerId as ProviderId] = row as ProviderRow;
+      return acc;
+    },
+    {},
+  );
 
   const saveKey = async (providerId: ProviderId, key: string) => {
-    const res = await fetch('/api/providers', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ providerId, apiKey: key }),
-    });
-    const body = (await res.json()) as ApiResponse<ProviderRow>;
-    if (!res.ok || body.error) {
-      throw new Error('Key rejected');
-    }
+    const saved = await saveKeyMutation.mutateAsync({ providerId, apiKey: key });
     setProviderStatus({
       providerId,
       status: 'connected',
-      keyHint: body.data.keyHint,
+      keyHint: saved.keyHint,
       lastValidatedAt: new Date().toISOString(),
     });
-    setRecords((prev) => ({ ...prev, [providerId]: body.data }));
+    void listQuery.refetch();
   };
 
   const saveRouting = async (routing: Record<TaskType, TaskRoutingConfig>) => {
-    const res = await fetch('/api/providers/routing', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(Object.values(routing)),
-    });
-    if (!res.ok) {
-      throw new Error('Failed to save routing');
-    }
+    await routingUpdateMutation.mutateAsync(Object.values(routing));
   };
 
   return (
