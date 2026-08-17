@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { ArrowRight, Clapperboard, Palette, AudioLines, Code2, Timeline } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { TopNav } from '@/components/shared/top-nav';
 
 const PHASES = [
@@ -50,16 +50,21 @@ export default function Home() {
               hours a motion designer needs in After Effects.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button
-                size="lg"
-                className="bg-violet-600 hover:bg-violet-500"
-                render={<Link href="/projects" />}
+              <a
+                href="/projects"
+                className={cn(
+                  buttonVariants({ size: 'lg' }),
+                  'bg-violet-600 text-white hover:bg-violet-500',
+                )}
               >
                 Start a project <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button size="lg" variant="outline" render={<Link href="/settings" />}>
+              </a>
+              <a
+                href="/settings"
+                className={cn(buttonVariants({ size: 'lg', variant: 'outline' }))}
+              >
                 Configure providers
-              </Button>
+              </a>
             </div>
           </div>
         </section>
