@@ -13,7 +13,7 @@ test.describe('capture flow', () => {
   let projectId: string;
 
   test.beforeAll(async () => {
-    worker = spawn('npm', ['run', 'worker'], { stdio: 'pipe', shell: true });
+    worker = spawn('bun', ['run', 'worker'], { stdio: 'pipe', shell: true });
     // Wait for the worker to connect to Redis and start listening.
     await new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('worker failed to start')), 30_000);
