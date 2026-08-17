@@ -33,6 +33,10 @@ const eslintConfig = defineConfig([
     rules: {
       'no-console': 'warn',
       '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
       '@typescript-eslint/strict-boolean-expressions': [
         'error',
         {
