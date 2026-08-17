@@ -161,6 +161,7 @@ export default function ProjectCapturePage() {
           <div className="flex justify-end">
             <Button
               render={<Link href={`/projects/${projectId}/storyboard`} />}
+              nativeButton={false}
               className="bg-violet-600 hover:bg-violet-500"
             >
               Continue to storyboard <ArrowRight className="ml-2 h-4 w-4" />

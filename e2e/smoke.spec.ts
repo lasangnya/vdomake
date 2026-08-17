@@ -16,9 +16,10 @@ test.describe('VDOMake smoke', () => {
     }
   });
 
-  test('projects page shows empty state and provider gate', async ({ page }) => {
+  test('projects page renders and shows the provider gate', async ({ page }) => {
     await page.goto('/projects');
-    await expect(page.getByText('No projects yet')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Projects/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /New project/i })).toBeVisible();
     await expect(page.getByText(/Connect an AI provider/i)).toBeVisible();
   });
 

@@ -51,14 +51,21 @@ export function useEventStream<T>(url: string, options?: { onError?: (error: unk
         if (!disposed) setStatus('open');
       };
 
-      source.onmessage = (event) => {
+      const handleEvent = (event: MessageEvent) => {
         if (disposed) return;
         try {
-          setData(JSON.parse(event.data) as T);
+          const parsed = JSON.parse(event.data as string);
+          // The server wraps capture/export progress in an object that also
+          // carries the terminal status; expose the whole payload.
+          setData(parsed as T);
         } catch (error) {
           onErrorRef.current?.(error);
         }
       };
+      source.onmessage = handleEvent;
+      source.addEventListener('progress', handleEvent);
+      source.addEventListener('complete', handleEvent);
+      source.addEventListener('failed', handleEvent);
 
       source.onerror = () => {
         source.close();
