@@ -21,7 +21,8 @@
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate",
     "check": "npm run lint && npm run typecheck && npm run format:check && npm run test",
-    "prepare": "husky"
+    "prepare": "husky",
+    "worker": "tsx src/lib/queue/worker.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",
@@ -93,6 +94,7 @@
     "msw": "^2.15.0",
     "prettier": "^3.9.6",
     "tailwindcss": "^4",
+    "tsx": "^4.23.12",
     "typescript": "^5",
     "vitest": "^4.1.10"
   },

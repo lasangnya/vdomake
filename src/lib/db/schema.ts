@@ -3,11 +3,43 @@ import {
   doublePrecision,
   index,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core';
+
+export const projects = pgTable(
+  'projects',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    name: text('name').notNull(),
+    url: text('url').notNull(),
+    status: text('status').notNull().default('draft'),
+    themeManifest: jsonb('theme_manifest'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('projects_status_idx').on(table.status)],
+);
+
+export const captures = pgTable(
+  'captures',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    screenshotUrl: text('screenshot_url').notNull(),
+    scrollPosition: integer('scroll_position').notNull().default(0),
+    viewport: jsonb('viewport').notNull(),
+    order: integer('order').notNull().default(0),
+    metadata: jsonb('metadata'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('captures_project_id_idx').on(table.projectId)],
+);
 
 export const providerKeys = pgTable(
   'provider_keys',
@@ -60,3 +92,6 @@ export type ProviderKey = typeof providerKeys.$inferSelect;
 export type NewProviderKey = typeof providerKeys.$inferInsert;
 export type TaskRoutingRow = typeof taskRouting.$inferSelect;
 export type UsageLog = typeof usageLogs.$inferSelect;
+export type ProjectRow = typeof projects.$inferSelect;
+export type NewProject = typeof projects.$inferInsert;
+export type CaptureRow = typeof captures.$inferSelect;
