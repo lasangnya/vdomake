@@ -1,68 +1,85 @@
-import Image from 'next/image';
+import Link from 'next/link';
+import { ArrowRight, Clapperboard, Palette, AudioLines, Code2, Timeline } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { TopNav } from '@/components/shared/top-nav';
+
+const PHASES = [
+  {
+    icon: Clapperboard,
+    title: 'Capture',
+    description: 'Headless browser captures your site at 2x DPI and extracts its design DNA.',
+  },
+  {
+    icon: Palette,
+    title: 'Storyboard',
+    description: 'AI turns screenshots into an editable scene sequence with transitions.',
+  },
+  {
+    icon: AudioLines,
+    title: 'Voiceover',
+    description: 'Transcribe narration and tag keyframes so every beat lands on cue.',
+  },
+  {
+    icon: Code2,
+    title: 'Generate',
+    description: 'Motion Canvas code is generated and rendered into a preview video.',
+  },
+  {
+    icon: Timeline,
+    title: 'Export',
+    description: 'Fine-tune on a timeline and export production-ready MP4 up to 4K.',
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{' '}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{' '}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{' '}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{' '}
-            or the{' '}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{' '}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="flex min-h-screen flex-col bg-zinc-50">
+      <TopNav />
+      <main className="flex-1">
+        <section className="mx-auto w-full max-w-6xl px-6 pb-20 pt-20 lg:pt-28">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-medium text-violet-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-violet-600" />
+              AI-powered website-to-video
+            </span>
+            <h1 className="mt-6 text-4xl font-semibold tracking-tight text-zinc-900 sm:text-5xl">
+              Paste a URL. <span className="text-violet-600">Get a video.</span>
+            </h1>
+            <p className="mt-4 text-lg leading-relaxed text-zinc-600">
+              VDOMake turns any website into a polished, animated video in minutes — not the 4–8
+              hours a motion designer needs in After Effects.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button
+                size="lg"
+                className="bg-violet-600 hover:bg-violet-500"
+                render={<Link href="/projects" />}
+              >
+                Start a project <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+              <Button size="lg" variant="outline" render={<Link href="/settings" />}>
+                Configure providers
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto w-full max-w-6xl px-6 pb-24">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {PHASES.map(({ icon: Icon, title, description }) => (
+              <div
+                key={title}
+                className="group rounded-lg border border-zinc-200 bg-white p-5 transition-shadow hover:shadow-md"
+              >
+                <span className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-600 transition-colors group-hover:bg-violet-600 group-hover:text-white">
+                  <Icon className="h-4.5 w-4.5" />
+                </span>
+                <h3 className="text-sm font-semibold text-zinc-900">{title}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-zinc-500">{description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   );
