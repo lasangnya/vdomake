@@ -5,7 +5,6 @@
   "type": "module",
   "workspaces": [
     "apps/*",
-    "services/*",
     "packages/*"
   ],
   "scripts": {
@@ -41,12 +40,14 @@
     "@trpc/server": "^11.0.0",
     "@trpc/client": "^11.0.0",
     "@trpc/react-query": "^11.0.0",
-    "@tanstack/react-query": "^5.96.1"
+    "@tanstack/react-query": "^5.96.1",
+    "prettier": "^3.9.6"
   },
   "devDependencies": {
     "oxlint": "1.58.0",
     "oxfmt": "0.43.0",
     "ultracite": "7.4.2",
-    "knip": "^6.0.0"
+    "knip": "^6.0.0",
+    "turbo": "^2.9.17"
   }
 }

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const keyframeSchema = z
   .object({
@@ -13,9 +13,9 @@ export const keyframeSchema = z
   .superRefine((keyframe, ctx) => {
     if (keyframe.endTime <= keyframe.startTime) {
       ctx.addIssue({
-        code: 'custom',
-        path: ['endTime'],
-        message: 'endTime must be greater than startTime',
+        code: "custom",
+        path: ["endTime"],
+        message: "endTime must be greater than startTime",
       });
     }
   });
@@ -27,7 +27,7 @@ export const audioTrackSchema = z.object({
   duration: z.number().nonnegative(),
   transcript: z.object({
     text: z.string(),
-    language: z.string().default('unknown'),
+    language: z.string().default("unknown"),
     segments: z.array(
       z.object({
         id: z.number().int().nonnegative(),

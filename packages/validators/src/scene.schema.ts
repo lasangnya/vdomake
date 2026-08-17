@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const textOverlaySchema = z.object({
   id: z.string().min(1),
@@ -19,15 +19,15 @@ export const sceneSchema = z.object({
   order: z.number().int().nonnegative(),
   screenshotId: z.string().min(1),
   title: z.string().max(200),
-  description: z.string().max(1000).default(''),
+  description: z.string().max(1000).default(""),
   duration: z.number().positive().max(120),
   transition: z.object({
-    type: z.enum(['fade', 'slide', 'zoom', 'morph', 'wipe', 'dissolve']),
+    type: z.enum(["fade", "slide", "zoom", "morph", "wipe", "dissolve"]),
     duration: z.number().nonnegative().max(10),
-    easing: z.enum(['smooth', 'spring', 'linear']),
+    easing: z.enum(["smooth", "spring", "linear"]),
   }),
   camera: z.object({
-    type: z.enum(['static', 'pan', 'zoom-to', 'ken-burns']),
+    type: z.enum(["static", "pan", "zoom-to", "ken-burns"]),
     target: z
       .object({
         x: z.number(),
@@ -42,9 +42,11 @@ export const sceneSchema = z.object({
 export const storyboardSchema = z.object({
   id: z.string().min(1),
   projectId: z.string().min(1),
-  scenes: z.array(sceneSchema).min(1, 'Storyboard must contain at least one scene'),
+  scenes: z
+    .array(sceneSchema)
+    .min(1, "Storyboard must contain at least one scene"),
   version: z.number().int().nonnegative().default(1),
-  status: z.enum(['draft', 'finalized']).default('draft'),
+  status: z.enum(["draft", "finalized"]).default("draft"),
 });
 
 export type SceneInput = z.infer<typeof sceneSchema>;

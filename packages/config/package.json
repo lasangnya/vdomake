@@ -10,13 +10,15 @@
   },
   "scripts": {
     "lint": "oxlint .",
-    "format:check": "oxfmt --check .",
-    "typecheck": "tsc --noEmit"
+    "format:check": "prettier --check .",
+    "typecheck": "echo \"@vdomake/config: no TS source — skipping typecheck\"",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "bun-types": "catalog:"
   },
   "devDependencies": {
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "prettier": "catalog:"
   }
 }

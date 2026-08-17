@@ -8,9 +8,10 @@
   },
   "scripts": {
     "lint": "oxlint .",
-    "format:check": "oxfmt --check .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "zod": "catalog:"
@@ -19,6 +20,7 @@
     "@vdomake/config": "workspace:*",
     "bun-types": "catalog:",
     "typescript": "catalog:",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "prettier": "catalog:"
   }
 }

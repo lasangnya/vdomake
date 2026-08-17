@@ -1,8 +1,16 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const themeColorSchema = z.object({
   hex: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-  role: z.enum(['primary', 'secondary', 'accent', 'background', 'text', 'border', 'other']),
+  role: z.enum([
+    "primary",
+    "secondary",
+    "accent",
+    "background",
+    "text",
+    "border",
+    "other",
+  ]),
   usage: z.number().nonnegative().default(0),
 });
 

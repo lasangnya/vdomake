@@ -1,1 +1,4 @@
-npx lint-staged
+#!/bin/sh
+
+# Lint staged-ish: run oxlint over the workspace on commit.
+bun run lint --filter "*" 2>/dev/null || oxlint .

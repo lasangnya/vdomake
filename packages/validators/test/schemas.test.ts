@@ -1,63 +1,68 @@
-import { describe, expect, it } from 'vitest';
-import { urlInputSchema } from '../src/url-input.schema';
-import { keyframeSchema } from '../src/keyframe.schema';
-import { exportConfigSchema, batchExportConfigSchema } from '../src/export-config.schema';
-import { apiKeySchema, taskRoutingListSchema } from '../src/provider.schema';
-import { sceneSchema } from '../src/scene.schema';
-import { themeManifestSchema } from '../src/theme-manifest.schema';
+import { describe, expect, it } from "vitest";
+import { urlInputSchema } from "../src/url-input.schema";
+import { keyframeSchema } from "../src/keyframe.schema";
+import {
+  exportConfigSchema,
+  batchExportConfigSchema,
+} from "../src/export-config.schema";
+import { apiKeySchema, taskRoutingListSchema } from "../src/provider.schema";
+import { sceneSchema } from "../src/scene.schema";
+import { themeManifestSchema } from "../src/theme-manifest.schema";
 
-describe('url-input.schema', () => {
-  it('normalizes bare localhost to http', () => {
-    const parsed = urlInputSchema.parse({ url: 'localhost:3000' });
-    expect(parsed.url).toBe('http://localhost:3000');
+describe("url-input.schema", () => {
+  it("normalizes bare localhost to http", () => {
+    const parsed = urlInputSchema.parse({ url: "localhost:3000" });
+    expect(parsed.url).toBe("http://localhost:3000");
   });
 
-  it('prepends https to bare domains', () => {
-    const parsed = urlInputSchema.parse({ url: 'example.com' });
-    expect(parsed.url).toBe('https://example.com');
+  it("prepends https to bare domains", () => {
+    const parsed = urlInputSchema.parse({ url: "example.com" });
+    expect(parsed.url).toBe("https://example.com");
   });
 
-  it('keeps explicit protocols', () => {
-    expect(urlInputSchema.parse({ url: 'http://127.0.0.1:8080' }).url).toBe(
-      'http://127.0.0.1:8080',
+  it("keeps explicit protocols", () => {
+    expect(urlInputSchema.parse({ url: "http://127.0.0.1:8080" }).url).toBe(
+      "http://127.0.0.1:8080",
     );
-    expect(urlInputSchema.parse({ url: 'https://vdomake.app' }).url).toBe('https://vdomake.app');
+    expect(urlInputSchema.parse({ url: "https://vdomake.app" }).url).toBe(
+      "https://vdomake.app",
+    );
   });
 
-  it('rejects garbage input', () => {
-    expect(() => urlInputSchema.parse({ url: 'not a url at all' })).toThrow();
-    expect(() => urlInputSchema.parse({ url: '' })).toThrow();
+  it("rejects garbage input", () => {
+    expect(() => urlInputSchema.parse({ url: "not a url at all" })).toThrow();
+    expect(() => urlInputSchema.parse({ url: "" })).toThrow();
   });
 
-  it('accepts cookies and viewports', () => {
+  it("accepts cookies and viewports", () => {
     const parsed = urlInputSchema.parse({
-      url: 'https://example.com',
-      cookies: [{ name: 'session', value: 'abc' }],
+      url: "https://example.com",
+      cookies: [{ name: "session", value: "abc" }],
       viewports: [{ width: 1440, height: 900 }],
     });
-    expect(parsed.cookies?.[0].name).toBe('session');
+    expect(parsed.cookies?.[0].name).toBe("session");
     expect(parsed.viewports?.[0].deviceScaleFactor).toBe(2);
   });
 });
 
-describe('keyframe.schema', () => {
-  it('rejects endTime before startTime', () => {
+describe("keyframe.schema", () => {
+  it("rejects endTime before startTime", () => {
     expect(() =>
       keyframeSchema.parse({
-        id: 'kf-1',
-        projectId: 'p',
-        sceneId: 's',
+        id: "kf-1",
+        projectId: "p",
+        sceneId: "s",
         startTime: 5,
         endTime: 2,
       }),
     ).toThrow(/endTime/);
   });
 
-  it('accepts a valid keyframe with defaults', () => {
+  it("accepts a valid keyframe with defaults", () => {
     const kf = keyframeSchema.parse({
-      id: 'kf-1',
-      projectId: 'p',
-      sceneId: 's',
+      id: "kf-1",
+      projectId: "p",
+      sceneId: "s",
       startTime: 1,
       endTime: 4,
     });
@@ -66,18 +71,20 @@ describe('keyframe.schema', () => {
   });
 });
 
-describe('export-config.schema', () => {
-  it('defaults to single 1080p/30fps MP4', () => {
+describe("export-config.schema", () => {
+  it("defaults to single 1080p/30fps MP4", () => {
     const config = exportConfigSchema.parse({});
-    expect(config.mode).toBe('single');
+    expect(config.mode).toBe("single");
     expect(config.resolution).toEqual({ width: 1920, height: 1080 });
     expect(config.frameRate).toBe(30);
   });
 
-  it('validates batch config requires resolutions', () => {
-    expect(() => batchExportConfigSchema.parse({ mode: 'batch' })).toThrow(/batch/i);
+  it("validates batch config requires resolutions", () => {
+    expect(() => batchExportConfigSchema.parse({ mode: "batch" })).toThrow(
+      /batch/i,
+    );
     const ok = batchExportConfigSchema.parse({
-      mode: 'batch',
+      mode: "batch",
       batchResolutions: [
         { width: 1280, height: 720 },
         { width: 3840, height: 2160 },
@@ -87,83 +94,94 @@ describe('export-config.schema', () => {
   });
 });
 
-describe('provider.schema', () => {
-  it('accepts a valid API key payload', () => {
-    const parsed = apiKeySchema.parse({ providerId: 'openai', apiKey: 'sk-test' });
-    expect(parsed.providerId).toBe('openai');
+describe("provider.schema", () => {
+  it("accepts a valid API key payload", () => {
+    const parsed = apiKeySchema.parse({
+      providerId: "openai",
+      apiKey: "sk-test",
+    });
+    expect(parsed.providerId).toBe("openai");
   });
 
-  it('rejects unknown providers', () => {
-    expect(() => apiKeySchema.parse({ providerId: 'claude-ai', apiKey: 'x' })).toThrow();
+  it("rejects unknown providers", () => {
+    expect(() =>
+      apiKeySchema.parse({ providerId: "claude-ai", apiKey: "x" }),
+    ).toThrow();
   });
 
-  it('validates a routing list', () => {
+  it("validates a routing list", () => {
     const routes = taskRoutingListSchema.parse([
-      { taskType: 'storyboard', primaryProviderId: 'openai' },
-      { taskType: 'transcription', primaryProviderId: 'openai' },
+      { taskType: "storyboard", primaryProviderId: "openai" },
+      { taskType: "transcription", primaryProviderId: "openai" },
     ]);
     expect(routes).toHaveLength(2);
   });
 });
 
-describe('scene.schema', () => {
-  it('accepts a full scene', () => {
+describe("scene.schema", () => {
+  it("accepts a full scene", () => {
     const scene = sceneSchema.parse({
-      id: 'sc-1',
+      id: "sc-1",
       order: 0,
-      screenshotId: 'shot-1',
-      title: 'Hero',
+      screenshotId: "shot-1",
+      title: "Hero",
       duration: 4,
-      transition: { type: 'fade', duration: 0.5, easing: 'smooth' },
-      camera: { type: 'zoom-to', target: { x: 10, y: 20, scale: 1.5 } },
+      transition: { type: "fade", duration: 0.5, easing: "smooth" },
+      camera: { type: "zoom-to", target: { x: 10, y: 20, scale: 1.5 } },
       overlays: [
-        { id: 'ov-1', text: 'Hello', position: { x: 0, y: 0 }, fontSize: 24, color: '#ffffff' },
+        {
+          id: "ov-1",
+          text: "Hello",
+          position: { x: 0, y: 0 },
+          fontSize: 24,
+          color: "#ffffff",
+        },
       ],
     });
-    expect(scene.overlays[0].color).toBe('#ffffff');
+    expect(scene.overlays[0].color).toBe("#ffffff");
   });
 
-  it('rejects unknown transition types', () => {
+  it("rejects unknown transition types", () => {
     expect(() =>
       sceneSchema.parse({
-        id: 'sc-1',
+        id: "sc-1",
         order: 0,
-        screenshotId: 'shot-1',
-        title: 'x',
+        screenshotId: "shot-1",
+        title: "x",
         duration: 2,
-        transition: { type: 'teleport', duration: 0.5, easing: 'smooth' },
-        camera: { type: 'static' },
+        transition: { type: "teleport", duration: 0.5, easing: "smooth" },
+        camera: { type: "static" },
         overlays: [],
       }),
     ).toThrow();
   });
 });
 
-describe('theme-manifest.schema', () => {
-  it('accepts a minimal manifest', () => {
+describe("theme-manifest.schema", () => {
+  it("accepts a minimal manifest", () => {
     const manifest = themeManifestSchema.parse({
-      colors: [{ hex: '#0f172a', role: 'text', usage: 12 }],
-      fonts: [{ family: 'Inter', weights: [400], sizes: [16], usage: 5 }],
+      colors: [{ hex: "#0f172a", role: "text", usage: 12 }],
+      fonts: [{ family: "Inter", weights: [400], sizes: [16], usage: 5 }],
       spacing: { unit: 8, rhythm: [8, 16, 24] },
       borderRadius: { small: 4, medium: 8, large: 12 },
       shadows: [],
       brandAssets: {},
-      sourceUrl: 'https://example.com',
-      extractedAt: '2026-08-17T10:00:00.000Z',
+      sourceUrl: "https://example.com",
+      extractedAt: "2026-08-17T10:00:00.000Z",
     });
-    expect(manifest.colors[0].hex).toBe('#0f172a');
+    expect(manifest.colors[0].hex).toBe("#0f172a");
   });
 
-  it('rejects invalid hex colors', () => {
+  it("rejects invalid hex colors", () => {
     expect(() =>
       themeManifestSchema.parse({
-        colors: [{ hex: 'red', role: 'text', usage: 1 }],
+        colors: [{ hex: "red", role: "text", usage: 1 }],
         fonts: [],
         spacing: { unit: 8, rhythm: [] },
         borderRadius: { small: 0, medium: 0, large: 0 },
         brandAssets: {},
-        sourceUrl: 'https://example.com',
-        extractedAt: '2026-08-17T10:00:00.000Z',
+        sourceUrl: "https://example.com",
+        extractedAt: "2026-08-17T10:00:00.000Z",
       }),
     ).toThrow(/hex/);
   });
