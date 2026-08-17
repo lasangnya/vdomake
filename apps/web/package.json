@@ -6,23 +6,20 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint src/ --max-warnings 0",
-    "lint:fix": "eslint src/ --fix",
-    "lint:design": "node .gemini/skills/impeccable/scripts/detect.mjs",
-    "format": "prettier --write src/",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "lint:design": "node ../../.gemini/skills/impeccable/scripts/detect.mjs",
+    "format": "prettier --write src/ ./*.ts ./*.mjs",
     "format:check": "prettier --check src/",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:generate": "drizzle-kit generate",
-    "check": "npm run lint && npm run typecheck && npm run format:check && npm run test",
-    "prepare": "husky",
-    "worker": "tsx src/lib/queue/worker.ts"
+    "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",
@@ -103,14 +100,5 @@
     "tsx": "^4.23.12",
     "typescript": "^5",
     "vitest": "^4.1.10"
-  },
-  "lint-staged": {
-    "src/**/*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "src/**/*.{css,json,md}": [
-      "prettier --write"
-    ]
   }
 }

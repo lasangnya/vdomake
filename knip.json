@@ -1,0 +1,25 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    "apps/web": {
+      "entry": [
+        "src/app/**/*.{ts,tsx}",
+        "src/lib/queue/worker.ts",
+        "next.config.ts",
+        "postcss.config.mjs",
+        "playwright.config.ts",
+        "vitest.config.ts",
+        "e2e/**/*.spec.ts"
+      ],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "packages/validators": {
+      "entry": ["src/index.ts", "vitest.config.ts", "test/**/*.test.ts"]
+    },
+    "packages/logger": {
+      "entry": ["src/index.ts"]
+    },
+    "packages/config": {}
+  },
+  "ignore": ["**/*.test.ts", "**/*.spec.ts", "apps/web/e2e/**"]
+}

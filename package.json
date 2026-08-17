@@ -21,10 +21,17 @@
     "db:push": "cd apps/web && bun run db:push",
     "db:studio": "cd apps/web && bun run db:studio",
     "db:generate": "cd apps/web && bun run db:generate",
-    "worker": "bun run --cwd apps/web src/lib/queue/worker.ts"
+    "worker": "bun run --cwd apps/web src/lib/queue/worker.ts",
+    "format:fix": "turbo run format:fix",
+    "knip": "knip"
   },
   "packageManager": "bun@1.3.13",
-  "trustedDependencies": ["playwright", "esbuild", "sharp", "motion-canvas"],
+  "trustedDependencies": [
+    "playwright",
+    "esbuild",
+    "sharp",
+    "motion-canvas"
+  ],
   "catalog": {
     "bun-types": "^1.3.12",
     "drizzle-orm": "^0.45.2",
@@ -35,5 +42,11 @@
     "@trpc/client": "^11.0.0",
     "@trpc/react-query": "^11.0.0",
     "@tanstack/react-query": "^5.96.1"
+  },
+  "devDependencies": {
+    "oxlint": "1.58.0",
+    "oxfmt": "0.43.0",
+    "ultracite": "7.4.2",
+    "knip": "^6.0.0"
   }
 }

@@ -75,10 +75,16 @@ export const providerRouter = {
   routingUpdate: publicProcedure.input(taskRoutingListSchema).mutation(async ({ ctx, input }) => {
     for (const route of input) {
       if (!providerExists(route.primaryProviderId)) {
-        throw new TRPCError({ code: 'BAD_REQUEST', message: `Unknown provider: ${route.primaryProviderId}` });
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: `Unknown provider: ${route.primaryProviderId}`,
+        });
       }
       if (route.fallbackProviderId && !providerExists(route.fallbackProviderId)) {
-        throw new TRPCError({ code: 'BAD_REQUEST', message: `Unknown provider: ${route.fallbackProviderId}` });
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: `Unknown provider: ${route.fallbackProviderId}`,
+        });
       }
       const existing = await ctx.db
         .select({ id: taskRouting.id })

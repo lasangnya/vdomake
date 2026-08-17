@@ -25,15 +25,13 @@ export async function buildRouter(): Promise<ProviderRouter> {
       // Skip keys that fail to decrypt (e.g. before ENCRYPTION_SECRET was set).
     }
   }
-  const routes = routingRows.map(
-    (r): TaskRoutingConfig => ({
-      taskType: r.taskType as TaskRoutingConfig['taskType'],
-      primaryProviderId: r.primaryProviderId as ProviderId,
-      primaryModel: r.primaryModel ?? undefined,
-      fallbackProviderId: (r.fallbackProviderId as ProviderId | null) ?? null,
-      fallbackModel: r.fallbackModel ?? null,
-    }),
-  );
+  const routes = routingRows.map((r): TaskRoutingConfig => ({
+    taskType: r.taskType as TaskRoutingConfig['taskType'],
+    primaryProviderId: r.primaryProviderId as ProviderId,
+    primaryModel: r.primaryModel ?? undefined,
+    fallbackProviderId: (r.fallbackProviderId as ProviderId | null) ?? null,
+    fallbackModel: r.fallbackModel ?? null,
+  }));
   return new ProviderRouter({ keys: providerKeysMap, routes });
 }
 

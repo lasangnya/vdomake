@@ -35,21 +35,19 @@ export const projectRouter = {
     return rows;
   }),
 
-  get: publicProcedure
-    .input(z.object({ id: z.string().uuid() }))
-    .query(async ({ ctx, input }) => {
-      const project = await ctx.db.select().from(projects).where(eq(projects.id, input.id)).limit(1);
-      const row = project[0] as ProjectRow | undefined;
-      if (!row) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Project not found' });
-      }
-      const frames = await ctx.db
-        .select()
-        .from(captures)
-        .where(eq(captures.projectId, input.id))
-        .orderBy(captures.order);
-      return { ...row, captures: frames };
-    }),
+  get: publicProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ ctx, input }) => {
+    const project = await ctx.db.select().from(projects).where(eq(projects.id, input.id)).limit(1);
+    const row = project[0] as ProjectRow | undefined;
+    if (!row) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'Project not found' });
+    }
+    const frames = await ctx.db
+      .select()
+      .from(captures)
+      .where(eq(captures.projectId, input.id))
+      .orderBy(captures.order);
+    return { ...row, captures: frames };
+  }),
 
   create: publicProcedure
     .input(urlInputSchema.pick({ url: true }))

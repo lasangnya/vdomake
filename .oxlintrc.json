@@ -1,0 +1,75 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "ignorePatterns": [
+    ".agents/",
+    ".gemini/",
+    "**/*.md",
+    "apps/web/src/components/ui/",
+    "apps/web/motion-canvas/",
+    "packages/logger/",
+    "**/drizzle/",
+    "**/*.d.ts"
+  ],
+  "extends": [
+    "./node_modules/ultracite/config/oxlint/core/.oxlintrc.json",
+    "./node_modules/ultracite/config/oxlint/react/.oxlintrc.json"
+  ],
+  "rules": {
+    "func-style": "off",
+    "no-warning-comments": "off",
+    "no-console": "off",
+    "sort-keys": "off",
+    "curly": "off",
+    "react-perf/jsx-no-new-function-as-prop": "off",
+    "require-await": "off",
+    "import/consistent-type-specifier-style": "off",
+    "typescript/array-type": "off",
+    "typescript/consistent-type-imports": "off",
+    "unicorn/numeric-separators-style": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/switch-case-braces": "off",
+    "unicorn/no-nested-ternary": "off",
+    "react/no-array-index-key": "off",
+    "promise/avoid-new": "off",
+    "max-classes-per-file": "off",
+    "eqeqeq": "off",
+    "complexity": "off",
+    "class-methods-use-this": "off",
+    "typescript/consistent-generic-constructors": "off",
+    "unicorn/no-array-reduce": "off",
+    "arrow-body-style": "off",
+    "prefer-destructuring": "off",
+    "no-use-before-define": "off",
+    "no-array-sort": "off",
+    "no-nested-ternary": "off",
+    "prefer-ternary": "off",
+    "prefer-await-to-then": "off",
+    "no-non-null-assertion": "off",
+    "prefer-add-event-listener": "off",
+    "no-await-expression-member": "off",
+    "prefer-response-static-json": "off",
+    "no-useless-undefined": "off",
+    "no-negated-condition": "off",
+    "no-inline-comments": "off",
+    "no-eq-null": "off",
+    "prefer-string-replace-all": "off",
+    "prefer-set-has": "off",
+    "prefer-module": "off",
+    "prefer-default-parameters": "off",
+    "prefer-array-find": "off",
+    "no-promise-executor-return": "off"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx", "**/test/**"],
+      "rules": {
+        "vitest/no-importing-vitest-globals": "off",
+        "vitest/prefer-strict-equal": "off",
+        "vitest/prefer-to-be-falsy": "off",
+        "vitest/prefer-to-be-truthy": "off",
+        "vitest/no-standalone-expect": "off",
+        "jest/prefer-strict-equal": "off"
+      }
+    }
+  ]
+}

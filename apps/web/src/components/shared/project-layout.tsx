@@ -5,7 +5,6 @@ import { Menu, Settings, Home } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { PhaseStepper } from './phase-stepper';
 
 export function ProjectLayout({
@@ -39,7 +38,10 @@ export function ProjectLayout({
       <div className="border-t border-zinc-200 px-3 pt-4">
         <button
           type="button"
-          onClick={() => onNavigate?.('/')}
+          onClick={() => {
+            onNavigate?.('/');
+            setSheetOpen(false);
+          }}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
         >
           <Home className="h-4 w-4" />
@@ -47,7 +49,10 @@ export function ProjectLayout({
         </button>
         <button
           type="button"
-          onClick={() => onNavigate?.('/settings')}
+          onClick={() => {
+            onNavigate?.('/settings');
+            setSheetOpen(false);
+          }}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
         >
           <Settings className="h-4 w-4" />
@@ -80,14 +85,7 @@ export function ProjectLayout({
         />
         <SheetContent side="left" className="w-72 p-4">
           <SheetTitle className="sr-only">Project navigation</SheetTitle>
-          <div
-            className={cn('h-full')}
-            onClick={() => {
-              setSheetOpen(false);
-            }}
-          >
-            {sidebarContent}
-          </div>
+          <div className="h-full">{sidebarContent}</div>
         </SheetContent>
       </Sheet>
 
