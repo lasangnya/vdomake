@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { captureQueue, type CaptureJobResult } from '@/lib/queue';
 import { createSSEStream } from '@/lib/utils/sse';
-import { logger } from '@/lib/utils/logger';
+import { logger } from '@vdomake/logger';
 import type { CaptureJob } from '@/types/api';
 
 export const dynamic = 'force-dynamic';

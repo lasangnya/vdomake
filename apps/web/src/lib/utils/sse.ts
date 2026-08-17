@@ -1,4 +1,4 @@
-import { logger } from './logger';
+import { logger } from '@vdomake/logger';
 
 export interface SSEStream {
   stream: ReadableStream<Uint8Array>;

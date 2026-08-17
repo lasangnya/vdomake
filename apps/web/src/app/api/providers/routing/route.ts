@@ -3,9 +3,9 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { taskRouting } from '@/lib/db/schema';
 import { providerExists } from '@/lib/providers/provider-registry';
-import { taskRoutingListSchema } from '@/lib/validators/provider.schema';
+import { taskRoutingListSchema } from '@vdomake/validators';
 import { toErrorResponse, throwApiError } from '@/lib/utils/api-error';
-import type { TaskRoutingInput } from '@/lib/validators/provider.schema';
+import type { TaskRoutingInput } from '@vdomake/validators';
 
 export const dynamic = 'force-dynamic';
 

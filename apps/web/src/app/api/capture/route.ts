@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { projects, type ProjectRow } from '@/lib/db/schema';
 import { captureQueue, type CaptureJobData } from '@/lib/queue';
-import { urlInputSchema } from '@/lib/validators/url-input.schema';
+import { urlInputSchema } from '@vdomake/validators';
 import { toErrorResponse, throwApiError } from '@/lib/utils/api-error';
 
 const uuidSchema = () => z.string().uuid();

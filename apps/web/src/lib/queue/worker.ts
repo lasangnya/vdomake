@@ -6,7 +6,7 @@ import { db } from '@/lib/db';
 import { captures, projects } from '@/lib/db/schema';
 import { redisConnection } from '@/lib/queue';
 import { captureSite, frameFilename, type CaptureStage } from '@/lib/capture/capture-engine';
-import { logger } from '@/lib/utils/logger';
+import { logger } from '@vdomake/logger';
 import type { CaptureJobData, CaptureJobResult } from './index';
 
 const UPLOADS_ROOT = path.join(process.cwd(), 'uploads');

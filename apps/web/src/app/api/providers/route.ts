@@ -4,9 +4,9 @@ import { db } from '@/lib/db';
 import { providerKeys } from '@/lib/db/schema';
 import { keyManager } from '@/lib/providers/key-manager';
 import { getProvider, providerExists } from '@/lib/providers/provider-registry';
-import { apiKeySchema } from '@/lib/validators/provider.schema';
+import { apiKeySchema } from '@vdomake/validators';
 import { toErrorResponse, throwApiError } from '@/lib/utils/api-error';
-import { logger } from '@/lib/utils/logger';
+import { logger } from '@vdomake/logger';
 import type { ProviderId } from '@/types/provider';
 
 export const dynamic = 'force-dynamic';

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { captures, projects } from '@/lib/db/schema';
-import { urlInputSchema } from '@/lib/validators/url-input.schema';
+import { urlInputSchema } from '@vdomake/validators';
 import { toErrorResponse } from '@/lib/utils/api-error';
 
 export const dynamic = 'force-dynamic';

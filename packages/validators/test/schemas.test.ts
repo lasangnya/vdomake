@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { urlInputSchema } from '@/lib/validators/url-input.schema';
-import { keyframeSchema } from '@/lib/validators/keyframe.schema';
-import { exportConfigSchema, batchExportConfigSchema } from '@/lib/validators/export-config.schema';
-import { apiKeySchema, taskRoutingListSchema } from '@/lib/validators/provider.schema';
-import { sceneSchema } from '@/lib/validators/scene.schema';
-import { themeManifestSchema } from '@/lib/validators/theme-manifest.schema';
+import { urlInputSchema } from '../src/url-input.schema';
+import { keyframeSchema } from '../src/keyframe.schema';
+import { exportConfigSchema, batchExportConfigSchema } from '../src/export-config.schema';
+import { apiKeySchema, taskRoutingListSchema } from '../src/provider.schema';
+import { sceneSchema } from '../src/scene.schema';
+import { themeManifestSchema } from '../src/theme-manifest.schema';
 
 describe('url-input.schema', () => {
   it('normalizes bare localhost to http', () => {

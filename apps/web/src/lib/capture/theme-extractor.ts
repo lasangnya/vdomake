@@ -1,5 +1,5 @@
 import type { Page } from 'playwright';
-import { themeManifestSchema } from '@/lib/validators/theme-manifest.schema';
+import { themeManifestSchema } from '@vdomake/validators';
 import type { ThemeManifest } from '@/types/theme';
 
 /**
