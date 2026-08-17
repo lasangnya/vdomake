@@ -5,6 +5,8 @@ const connection = new IORedis(process.env.REDIS_URL ?? 'redis://localhost:6379'
   maxRetriesPerRequest: null,
 });
 
+export { connection as redisConnection };
+
 export const CAPTURE_QUEUE = 'capture';
 export const RENDER_QUEUE = 'render';
 export const EXPORT_QUEUE = 'export';
@@ -20,6 +22,20 @@ export interface CaptureJobData {
   url: string;
   viewports: Array<{ width: number; height: number; deviceScaleFactor: number; isMobile: boolean }>;
   cookies?: unknown[];
+}
+
+export interface CaptureJobResult {
+  projectId: string;
+  pageTitle: string;
+  finalUrl: string;
+  manifest: Record<string, unknown>;
+  frames: Array<{
+    screenshotUrl: string;
+    scrollPosition: number;
+    order: number;
+    viewport: { width: number; height: number; deviceScaleFactor: number; isMobile: boolean };
+    metadata: Record<string, unknown>;
+  }>;
 }
 
 export interface RenderJobData {
