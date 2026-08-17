@@ -111,6 +111,9 @@ docker compose up -d
 
 # 4. Apply the database schema
 bun run db:push
+
+# 5. (Optional) make `vdo` a standalone command you can run from anywhere
+cd apps/cli && bun link
 ```
 
 ---
@@ -120,10 +123,15 @@ bun run db:push
 The **quickest way** is the `vdo` developer CLI (rooted at `apps/cli`):
 
 ```bash
-bun run vdo up          # 1. Postgres + Redis
-bun run vdo dev         # 2. Next.js dev server → http://localhost:3000
-bun run vdo worker      # 3. capture worker (URL → screenshots)
+vdo up          # 1. Postgres + Redis
+vdo dev         # 2. Next.js dev server → http://localhost:3000
+vdo worker      # 3. capture worker (URL → screenshots)
 ```
+
+> **`vdo` is available two ways.** After `bun link` in `apps/cli` (run once), it
+> works as a **standalone command** from anywhere (`vdo up`). Otherwise prefix it
+> with `bun run`: `bun run vdo up`. Both are equivalent — the CLI lives in
+> `apps/cli` and runs via Bun.
 
 Or run the underlying commands directly:
 
@@ -172,11 +180,14 @@ USAGE vdo up|down|dev|worker|build|check|db
 Examples:
 
 ```bash
-bun run vdo            # list commands
-bun run vdo db --help  # db subcommands
-bun run vdo dev --worker  # dev server + capture worker in one
-bun run vdo check      # run all checks before pushing
+vdo                 # list commands (or: bun run vdo)
+vdo db --help       # db subcommands
+vdo dev --worker    # dev server + capture worker in one
+vdo check           # run all checks before pushing
 ```
+
+> If `vdo` isn't found, run `bun run vdo` instead — or install the standalone
+> binary once with `cd apps/cli && bun link`.
 
 ---
 
