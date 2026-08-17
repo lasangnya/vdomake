@@ -18,7 +18,7 @@ describe('UrlInput', () => {
   it('prepends http:// when localhost mode is enabled', () => {
     const onSubmit = vi.fn();
     render(<UrlInput onSubmit={onSubmit} />);
-    fireEvent.click(screen.getByLabelText('Capture localhost'));
+    fireEvent.click(screen.getByRole('switch', { name: /Capture localhost/i }));
     fireEvent.change(screen.getByLabelText('Website URL'), { target: { value: 'localhost:3000' } });
     fireEvent.click(screen.getByRole('button', { name: /Capture site/i }));
     expect(onSubmit).toHaveBeenCalledWith('http://localhost:3000', [

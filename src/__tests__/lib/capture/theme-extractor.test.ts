@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   buildThemeManifest,
   normalizeColor,
+  stripNameHelperCalls,
+  collectThemeStats,
   type RawThemeData,
 } from '@/lib/capture/theme-extractor';
 
@@ -44,6 +46,34 @@ describe('normalizeColor', () => {
 
   it('keeps 6-digit hex with lowercase output', () => {
     expect(normalizeColor('#7C3AED')).toBe('#7c3aed');
+  });
+});
+
+describe('stripNameHelperCalls', () => {
+  it('rewrites standalone __name statements to their expression', () => {
+    const source = 'function foo(){}__name(foo,"foo");return 1;';
+    expect(stripNameHelperCalls(source)).toBe('function foo(){}foo;return 1;');
+  });
+
+  it('unwraps __name around arrow expressions', () => {
+    const source = 'const toHex=__name(n=>Math.round(n).toString(16).padStart(2,"0"),"toHex");';
+    const cleaned = stripNameHelperCalls(source);
+    expect(cleaned).toContain('const toHex=n=>Math.round(n).toString(16).padStart(2,"0")');
+    expect(cleaned).not.toContain('__name');
+  });
+
+  it('handles nested parentheses inside the wrapped expression', () => {
+    const source = 'const x=__name((a)=>({v:(a*2).toFixed(1)}),"x");use(x);';
+    const cleaned = stripNameHelperCalls(source);
+    expect(cleaned).not.toContain('__name');
+    expect(cleaned).toContain('const x=(a)=>({v:(a*2).toFixed(1)})');
+  });
+
+  it('the serialized collector is fully hermetic after stripping', () => {
+    const cleaned = stripNameHelperCalls(collectThemeStats.toString());
+    expect(cleaned).not.toContain('__name');
+    expect(cleaned).toContain('normalizeHex');
+    expect(cleaned).not.toContain('COLOR_KIND');
   });
 });
 
