@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -64,12 +65,15 @@ export function TopNav({
             }
           />
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>VDOMake</DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>VDOMake</DropdownMenuLabel>
+              <DropdownMenuItem onClick={onSettings}>Settings</DropdownMenuItem>
+              <DropdownMenuItem>Feedback</DropdownMenuItem>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onSettings}>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Feedback</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Sign out</DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuItem variant="destructive">Sign out</DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
