@@ -1,0 +1,7 @@
+{
+  "extends": "@vdomake/config/tsconfig.bun.json",
+  "compilerOptions": {
+    "types": ["bun-types"]
+  },
+  "include": ["src"]
+}

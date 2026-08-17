@@ -1,0 +1,27 @@
+{
+  "name": "@vdo/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "vdo": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "oxlint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"@vdo/cli: no tests\""
+  },
+  "dependencies": {
+    "citty": "catalog:",
+    "execa": "catalog:",
+    "yoctocolors": "catalog:"
+  },
+  "devDependencies": {
+    "@vdomake/config": "workspace:*",
+    "bun-types": "catalog:",
+    "typescript": "catalog:",
+    "prettier": "catalog:"
+  }
+}
