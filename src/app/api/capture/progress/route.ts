@@ -57,12 +57,11 @@ export async function GET(request: NextRequest) {
   let pollTimer: NodeJS.Timeout | null = null;
   let done = false;
 
-  const emit = (jobStatus: CaptureJob) => {
-    send('progress', jobStatus);
+  const emit = (jobStatus: CaptureJob, result?: CaptureJobResult) => {
+    send('progress', result ? { ...jobStatus, result } : jobStatus);
     if (jobStatus.status === 'complete' || jobStatus.status === 'failed') {
       done = true;
-      if (pollTimer) clearInterval(pollTimer);
-      send(jobStatus.status, jobStatus);
+      if (pollTimer !== null) clearInterval(pollTimer);
       close();
     }
   };
@@ -91,12 +90,15 @@ export async function GET(request: NextRequest) {
 
     if (state === 'completed') {
       const result = fresh.returnvalue as CaptureJobResult | null;
-      emit({
-        ...base,
-        status: 'complete',
-        progress: 100,
-        message: `${result?.frames.length ?? 0} frames captured`,
-      });
+      emit(
+        {
+          ...base,
+          status: 'complete',
+          progress: 100,
+          message: `${result?.frames.length ?? 0} frames captured`,
+        },
+        result ?? undefined,
+      );
       return;
     }
     if (state === 'failed') {

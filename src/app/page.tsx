@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ArrowRight, Clapperboard, Palette, AudioLines, Code2, Timeline } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -50,7 +51,7 @@ export default function Home() {
               hours a motion designer needs in After Effects.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <a
+              <Link
                 href="/projects"
                 className={cn(
                   buttonVariants({ size: 'lg' }),
@@ -58,13 +59,13 @@ export default function Home() {
                 )}
               >
                 Start a project <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/settings"
                 className={cn(buttonVariants({ size: 'lg', variant: 'outline' }))}
               >
                 Configure providers
-              </a>
+              </Link>
             </div>
           </div>
         </section>
