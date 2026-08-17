@@ -1,0 +1,22 @@
+{
+  "name": "@vdomake/logger",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "oxlint .",
+    "format:check": "oxfmt --check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "pino": "catalog:"
+  },
+  "devDependencies": {
+    "@vdomake/config": "workspace:*",
+    "bun-types": "catalog:",
+    "typescript": "catalog:"
+  }
+}

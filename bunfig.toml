@@ -1,0 +1,5 @@
+[install]
+trustedDependencies = ["playwright", "esbuild", "sharp", "@motion-canvas", "motion-canvas"]
+
+[install.scopes]
+# keep prod deps in the app package as-is

@@ -1,0 +1,22 @@
+{
+  "name": "@vdomake/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./tsconfig.bun.json": "./tsconfig.bun.json",
+    "./tsconfig.react.json": "./tsconfig.react.json"
+  },
+  "scripts": {
+    "lint": "oxlint .",
+    "format:check": "oxfmt --check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "bun-types": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

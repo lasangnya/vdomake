@@ -8,6 +8,7 @@ class MockEventSource {
   onopen: (() => void) | null = null;
   onmessage: ((event: { data: string }) => void) | null = null;
   onerror: (() => void) | null = null;
+  listeners: Map<string, Set<(event: { data: string }) => void>> = new Map();
   closed = false;
 
   constructor(url: string) {
@@ -19,12 +20,26 @@ class MockEventSource {
     this.closed = true;
   }
 
+  addEventListener(type: string, handler: (event: { data: string }) => void) {
+    const set = this.listeners.get(type) ?? new Set();
+    set.add(handler);
+    this.listeners.set(type, set);
+  }
+
+  removeEventListener(type: string, handler: (event: { data: string }) => void) {
+    this.listeners.get(type)?.delete(handler);
+  }
+
   emitOpen() {
     this.onopen?.();
   }
 
   emitMessage(data: string) {
-    this.onmessage?.({ data });
+    const event = { data };
+    this.onmessage?.(event);
+    for (const [, set] of this.listeners) {
+      for (const handler of set) handler(event);
+    }
   }
 
   emitError() {
