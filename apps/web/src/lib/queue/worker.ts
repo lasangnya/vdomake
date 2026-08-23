@@ -6,8 +6,10 @@ import { db } from '@/lib/db';
 import { captures, projects } from '@/lib/db/schema';
 import { redisConnection } from '@/lib/queue';
 import { captureSite, frameFilename, type CaptureStage } from '@/lib/capture/capture-engine';
+import { renderProject } from '@/lib/render/render-project';
+import { previewFileUrl } from '@/lib/codegen/generate-service';
 import { logger } from '@vdomake/logger';
-import type { CaptureJobData, CaptureJobResult } from './index';
+import type { CaptureJobData, CaptureJobResult, RenderJobData, RenderJobResult } from './index';
 
 const UPLOADS_ROOT = path.join(process.cwd(), 'uploads');
 
@@ -119,9 +121,56 @@ captureWorker.on('error', (error) => {
   logger.error({ error: error.message }, 'Capture worker error');
 });
 
+// --- Render worker (Phase 4) ---
+
+async function processRender(
+  job: Job<RenderJobData>,
+  _token: string | undefined,
+  signal?: AbortSignal,
+): Promise<RenderJobResult> {
+  const { projectId } = job.data;
+  logger.info({ projectId }, 'Render job started');
+  await job.updateProgress(5);
+
+  const result = await renderProject(
+    projectId,
+    (stage, current, total) => {
+      const base = stage === 'rendering_frames' ? 15 : 85;
+      const span = stage === 'rendering_frames' ? 65 : 10;
+      const pct = total > 0 ? Math.round(base + (span * current) / total) : base;
+      void job.updateProgress(pct);
+    },
+    signal,
+  );
+
+  await db
+    .update(projects)
+    .set({ previewUrl: previewFileUrl(projectId), status: 'done', updatedAt: new Date() })
+    .where(eq(projects.id, projectId));
+  await job.updateProgress(100);
+
+  logger.info({ projectId, duration: result.duration }, 'Render job completed');
+  return { projectId, outputPath: result.outputPath, duration: result.duration };
+}
+
+const renderWorker = new Worker('render', processRender, {
+  connection: redisConnection,
+  concurrency: 1,
+});
+
+renderWorker.on('failed', (job, error) => {
+  const projectId = job?.data.projectId ?? 'unknown';
+  logger.error({ projectId, error: error.message }, 'Render job failed');
+  void db
+    .update(projects)
+    .set({ status: 'ready', updatedAt: new Date() })
+    .where(eq(projects.id, projectId))
+    .catch(() => undefined);
+});
+
 async function shutdown(signal: string): Promise<void> {
-  logger.info({ signal }, 'Shutting down capture worker');
-  await captureWorker.close();
+  logger.info({ signal }, 'Shutting down workers');
+  await Promise.all([captureWorker.close(), renderWorker.close()]);
   await redisConnection.quit().catch(() => undefined);
   process.exit(0);
 }
@@ -129,4 +178,4 @@ async function shutdown(signal: string): Promise<void> {
 process.on('SIGTERM', () => void shutdown('SIGTERM'));
 process.on('SIGINT', () => void shutdown('SIGINT'));
 
-logger.info('Capture worker listening on queue "capture"');
+logger.info('Workers listening (capture, render)');

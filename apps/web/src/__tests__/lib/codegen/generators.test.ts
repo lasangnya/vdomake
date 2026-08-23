@@ -1,0 +1,169 @@
+import { describe, expect, it } from 'vitest';
+import { transitionIn, cameraMove } from '@/lib/codegen/transition-library';
+import { generateSceneCode } from '@/lib/codegen/scene-generator';
+import { generateProjectFiles } from '@/lib/codegen/project-generator';
+import { computeAudioOffset, generateProjectAudio } from '@/lib/codegen/audio-integrator';
+import type { Scene } from '@/types/scene';
+import type { ThemeManifest } from '@/types/theme';
+import type { Keyframe } from '@/types/keyframe';
+
+function makeScene(overrides: Partial<Scene> = {}): Scene {
+  return {
+    id: 'sc-1',
+    order: 0,
+    screenshotId: 'shot-1',
+    title: 'Hero',
+    description: '',
+    duration: 4,
+    transition: { type: 'fade', duration: 0.6, easing: 'smooth' },
+    camera: { type: 'static' },
+    overlays: [
+      {
+        id: 'ov-1',
+        text: 'Paste a URL',
+        position: { x: 50, y: 20 },
+        fontSize: 48,
+        color: '#ffffff',
+      },
+    ],
+    ...overrides,
+  };
+}
+
+const THEME: ThemeManifest = {
+  colors: [{ hex: '#0f172a', role: 'text', usage: 1 }],
+  fonts: [{ family: 'Inter', weights: [400], sizes: [16], usage: 1 }],
+  spacing: { unit: 8, rhythm: [8] },
+  borderRadius: { small: 4, medium: 8, large: 12 },
+  shadows: [],
+  brandAssets: {},
+  sourceUrl: 'https://example.com',
+  extractedAt: '2026-01-01T00:00:00.000Z',
+};
+
+describe('transitionIn', () => {
+  it('generates a fade snippet', () => {
+    const snippet = transitionIn('img', { type: 'fade', duration: 0.6, easing: 'smooth' });
+    expect(snippet.inCode).toContain('img().opacity(1, 0.60, easeInOutCubic)');
+    expect(snippet.kind).toBe('fade');
+  });
+
+  it('generates a slide snippet', () => {
+    const snippet = transitionIn('img', { type: 'slide', duration: 0.8, easing: 'spring' });
+    expect(snippet.inCode).toContain('img().position.x(0, 0.80, easeOutBack)');
+  });
+
+  it('uses `all` import for zoom', () => {
+    const snippet = transitionIn('img', { type: 'zoom', duration: 0.5, easing: 'linear' });
+    expect(snippet.extraCoreImports).toContain('all');
+    expect(snippet.inCode).toContain('all(');
+  });
+});
+
+describe('cameraMove', () => {
+  it('returns a static no-op for static camera', () => {
+    const { code } = cameraMove('img', { type: 'static' }, 4);
+    expect(code).toContain('rotation(0, 0)');
+  });
+
+  it('produces a zoom for zoom-to camera', () => {
+    const { code } = cameraMove(
+      'img',
+      { type: 'zoom-to', target: { x: 50, y: 50, scale: 1.5 } },
+      4,
+    );
+    expect(code).toContain('img().scale(1.50, 4.00, linear)');
+  });
+
+  it('produces a slow zoom for ken-burns', () => {
+    const { code } = cameraMove('img', { type: 'ken-burns' }, 5);
+    expect(code).toContain('img().scale(1.08, 5.00, linear)');
+  });
+});
+
+describe('generateSceneCode', () => {
+  it('produces a scene file with the screenshot and overlay', () => {
+    const code = generateSceneCode({
+      scene: makeScene(),
+      assetPath: '/assets/scene-0.png',
+      theme: THEME,
+    });
+    expect(code).toContain('makeScene2D(function* (view)');
+    expect(code).toContain('src={"/assets/scene-0.png"}');
+    expect(code).toContain('text={"Paste a URL"}');
+    expect(code).toContain("fontFamily={'Inter'}");
+  });
+
+  it('includes the transition import for zoom scenes', () => {
+    const code = generateSceneCode({
+      scene: makeScene({ transition: { type: 'zoom', duration: 0.6, easing: 'smooth' } }),
+      assetPath: '/assets/scene-0.png',
+      theme: null,
+    });
+    expect(code).toContain('all');
+  });
+});
+
+describe('generateProjectFiles', () => {
+  it('generates the full project file set', () => {
+    const project = generateProjectFiles({
+      projectId: 'p-1',
+      scenes: [makeScene(), makeScene({ id: 'sc-2', title: 'Pricing' })],
+      theme: THEME,
+      screenshotSourcePaths: [
+        '/uploads/screenshots/p-1/frame-0000.png',
+        '/uploads/screenshots/p-1/frame-0001.png',
+      ],
+      keyframes: [],
+    });
+    expect(project.files['vite.config.ts']).toContain('@motion-canvas/vite-plugin');
+    expect(project.files['package.json']).toContain('vdomake-p-1');
+    expect(project.files['src/project.ts']).toContain('scene0');
+    expect(project.files['src/project.ts']).toContain('scene1');
+    expect(project.files['src/scenes/scene-0.tsx']).toBeDefined();
+    expect(project.files['src/scenes/scene-1.tsx']).toBeDefined();
+    expect(project.assets).toHaveLength(2);
+    expect(project.audioAssetPath).toBeNull();
+  });
+
+  it('includes the audio section when a voiceover is present', () => {
+    const project = generateProjectFiles({
+      projectId: 'p-1',
+      scenes: [makeScene()],
+      theme: null,
+      screenshotSourcePaths: ['/uploads/screenshots/p-1/frame-0000.png'],
+      audioSourcePath: '/audio/p-1/voice.mp3',
+      keyframes: [
+        {
+          sceneId: 'sc-1',
+          startTime: 1,
+          endTime: 5,
+          transitionDuration: 0.5,
+          isAutoGenerated: false,
+        } as Keyframe,
+      ],
+    });
+    expect(project.audioAssetPath).toBe('/assets/voiceover.mp3');
+    expect(project.files['src/project.ts']).toContain('audio: "/assets/voiceover.mp3"');
+    expect(project.files['src/project.ts']).toContain('audioOffset: 1.00');
+  });
+});
+
+describe('computeAudioOffset / generateProjectAudio', () => {
+  it('computes offset from the earliest keyframe', () => {
+    const keyframes = [
+      { sceneId: 'a', startTime: 3, endTime: 5, transitionDuration: 0.5, isAutoGenerated: false },
+      { sceneId: 'b', startTime: 7, endTime: 9, transitionDuration: 0.5, isAutoGenerated: false },
+    ] as Keyframe[];
+    expect(computeAudioOffset(keyframes)).toBe(3);
+  });
+
+  it('returns 0 without keyframes', () => {
+    expect(computeAudioOffset([])).toBe(0);
+  });
+
+  it('formats the project audio lines', () => {
+    const audio = generateProjectAudio({ audioAssetPath: '/assets/voiceover.mp3', keyframes: [] });
+    expect(audio).toContain('audio: "/assets/voiceover.mp3"');
+  });
+});

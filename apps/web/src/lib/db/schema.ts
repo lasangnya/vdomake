@@ -18,6 +18,7 @@ export const projects = pgTable(
     url: text('url').notNull(),
     status: text('status').notNull().default('draft'),
     themeManifest: jsonb('theme_manifest'),
+    previewUrl: text('preview_url'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

@@ -46,6 +46,12 @@ export interface RenderJobData {
   codec: 'h264' | 'webm';
 }
 
+export interface RenderJobResult {
+  projectId: string;
+  outputPath: string;
+  duration: number;
+}
+
 export interface ExportJobData {
   projectId: string;
   exportConfig: {

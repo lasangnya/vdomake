@@ -41,15 +41,8 @@ export const audioRouter = {
       }),
     )
     .mutation(async ({ input }) => {
-      await replaceKeyframes(input.projectId, input.keyframes);
-      const state = await getAudioState(input.projectId);
-      if (state.track === null) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Upload audio before tagging keyframes',
-        });
-      }
-      return state.keyframes;
+      const keyframes = await replaceKeyframes(input.projectId, input.keyframes);
+      return keyframes;
     }),
 
   /** Runs pause + content-based auto-sync and persists the resulting keyframes. */
