@@ -8,8 +8,16 @@ import { redisConnection } from '@/lib/queue';
 import { captureSite, frameFilename, type CaptureStage } from '@/lib/capture/capture-engine';
 import { renderProject } from '@/lib/render/render-project';
 import { previewFileUrl } from '@/lib/codegen/generate-service';
+import { runExport, updateExport } from '@/lib/render/export-service';
 import { logger } from '@vdomake/logger';
-import type { CaptureJobData, CaptureJobResult, RenderJobData, RenderJobResult } from './index';
+import type {
+  CaptureJobData,
+  CaptureJobResult,
+  ExportJobData,
+  ExportJobResult,
+  RenderJobData,
+  RenderJobResult,
+} from './index';
 
 const UPLOADS_ROOT = path.join(process.cwd(), 'uploads');
 
@@ -104,7 +112,7 @@ async function processCapture(
 
 const captureWorker = new Worker('capture', processCapture, {
   connection: redisConnection,
-  concurrency: 1,
+  concurrency: 4,
 });
 
 captureWorker.on('failed', (job, error) => {
@@ -134,6 +142,7 @@ async function processRender(
 
   const result = await renderProject(
     projectId,
+    { width: 1920, height: 1080, fps: 30 },
     (stage, current, total) => {
       const base = stage === 'rendering_frames' ? 15 : 85;
       const span = stage === 'rendering_frames' ? 65 : 10;
@@ -168,9 +177,56 @@ renderWorker.on('failed', (job, error) => {
     .catch(() => undefined);
 });
 
+// --- Export worker (Phase 5) ---
+
+async function processExport(job: Job<ExportJobData>): Promise<ExportJobResult> {
+  const { projectId, exportIds, config } = job.data;
+  logger.info({ projectId, exportIds }, 'Export job started');
+
+  const urls: string[] = [];
+  for (let i = 0; i < exportIds.length; i += 1) {
+    const exportId = exportIds[i];
+    const single = i === exportIds.length - 1;
+    const perResolutionConfig = {
+      ...config,
+      resolution:
+        config.mode === 'batch' && config.batchResolutions[i]
+          ? config.batchResolutions[i]
+          : config.resolution,
+      mode: 'single' as const,
+      batchResolutions: [],
+    };
+    try {
+      const row = await runExport(exportId, projectId, perResolutionConfig, (progress) => {
+        const overall = Math.round((i / exportIds.length) * 100 + progress / exportIds.length);
+        void job.updateProgress(overall);
+      });
+      if (row.fileUrl) urls.push(row.fileUrl);
+    } catch (error) {
+      await updateExport(exportId, { status: 'failed', completedAt: new Date() });
+      throw error;
+    }
+    void single;
+  }
+
+  await job.updateProgress(100);
+  logger.info({ projectId, exported: urls.length }, 'Export job completed');
+  return { projectId, exported: urls.length, urls };
+}
+
+const exportWorker = new Worker('export', processExport, {
+  connection: redisConnection,
+  concurrency: 1,
+});
+
+exportWorker.on('failed', (job, error) => {
+  const projectId = job?.data.projectId ?? 'unknown';
+  logger.error({ projectId, error: error.message }, 'Export job failed');
+});
+
 async function shutdown(signal: string): Promise<void> {
   logger.info({ signal }, 'Shutting down workers');
-  await Promise.all([captureWorker.close(), renderWorker.close()]);
+  await Promise.all([captureWorker.close(), renderWorker.close(), exportWorker.close()]);
   await redisConnection.quit().catch(() => undefined);
   process.exit(0);
 }
@@ -178,4 +234,4 @@ async function shutdown(signal: string): Promise<void> {
 process.on('SIGTERM', () => void shutdown('SIGTERM'));
 process.on('SIGINT', () => void shutdown('SIGINT'));
 
-logger.info('Workers listening (capture, render)');
+logger.info('Workers listening (capture, render, export)');

@@ -77,7 +77,8 @@ export async function POST(request: NextRequest) {
       cookies: body.cookies as CaptureJobData['cookies'],
     };
     const job = await captureQueue.add('capture-site', jobData, {
-      attempts: 1,
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 2000 },
       removeOnComplete: 100,
       removeOnFail: 1000,
     });

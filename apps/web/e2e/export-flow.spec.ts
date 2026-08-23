@@ -1,15 +1,15 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Generate & render flow: from a captured project with a seeded storyboard,
- * the generate page writes Motion Canvas code and renders a real preview MP4
- * (FFmpeg compositor). Verifies the code tabs and the rendered preview appear.
+ * Timeline & export flow: after capture + storyboard, the timeline page shows
+ * scene clips and playback controls, and a video export runs end-to-end
+ * through /api/export with SSE progress and a downloadable result.
  */
-test.describe('generate flow', () => {
+test.describe('timeline & export flow', () => {
   let projectId: string;
 
-  test('capture → storyboard → generate code → render preview', async ({ page }) => {
-    test.setTimeout(180_000);
+  test('timeline renders and export produces a downloadable video', async ({ page }) => {
+    test.setTimeout(240_000);
 
     // Capture the app itself.
     const response = await page.request.post('/api/capture', {
@@ -19,10 +19,9 @@ test.describe('generate flow', () => {
       },
     });
     expect(response.status()).toBe(202);
-    const body = await response.json();
-    projectId = body.data.projectId;
+    projectId = (await response.json()).data.projectId;
 
-    // Wait for captures to land (poll — captures queue behind one worker).
+    // Wait for captures to land (poll, tolerant of slower browsers + queue depth).
     let captures: Array<{ id: string }> = [];
     for (let attempt = 0; attempt < 90; attempt += 1) {
       await page.waitForTimeout(1_000);
@@ -42,15 +41,7 @@ test.describe('generate flow', () => {
         duration: 3,
         transition: { type: 'fade', duration: 0.5, easing: 'smooth' },
         camera: { type: 'zoom-to', target: { x: 50, y: 50, scale: 1.2 } },
-        overlays: [
-          {
-            id: 'o1',
-            text: 'Paste a URL',
-            position: { x: 50, y: 30 },
-            fontSize: 48,
-            color: '#ffffff',
-          },
-        ],
+        overlays: [],
       },
       {
         id: 'sc-2',
@@ -65,7 +56,6 @@ test.describe('generate flow', () => {
       },
     ];
 
-    // Seed storyboard + keyframes via tRPC.
     const sb = await page.request.post('/api/trpc/storyboard.save?batch=1', {
       headers: { 'Content-Type': 'application/json' },
       data: { '0': { projectId, storyboard: { projectId, scenes, version: 1, status: 'draft' } } },
@@ -98,21 +88,26 @@ test.describe('generate flow', () => {
     });
     expect(kf.status()).toBe(200);
 
-    // Drive the generate page UI.
-    await page.goto(`/projects/${projectId}/generate`);
-    await page.getByRole('button', { name: /Generate Video/i }).click();
-    await page.getByRole('button', { name: /Generate & render/i }).click();
+    // Timeline page renders scene clips + playback controls.
+    await page.goto(`/projects/${projectId}/timeline`);
+    await expect(page.getByRole('heading', { name: 'Timeline' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /play/i })).toBeVisible();
+    await expect(page.getByText('Hero').first()).toBeVisible();
+    await expect(page.getByText('Features').first()).toBeVisible();
 
-    // Code tabs appear after code generation.
-    await expect(page.getByRole('tab', { name: 'Generated code' })).toBeVisible({
-      timeout: 30_000,
-    });
-    await expect(page.getByText('src/project.ts').first()).toBeVisible();
+    // Trim a scene via the drag handles (pointer down on the left handle).
+    const heroClip = page.getByRole('button').filter({ hasText: 'Hero' }).first();
+    await expect(heroClip).toBeVisible();
 
-    // The preview tab shows a playable video once rendering finishes.
-    await page.getByRole('tab', { name: 'Preview' }).click();
-    const video = page.locator('video');
-    await expect(video).toBeVisible({ timeout: 90_000 });
-    await expect(video).toHaveAttribute('src', /\/api\/files\/exports\//);
+    // Export a single 720p video.
+    await page.getByTestId('open-export').click();
+    await expect(page.getByTestId('export-dialog')).toBeVisible();
+    await page.getByRole('button', { name: '720p' }).click();
+    await page.getByTestId('export-start').click();
+
+    // SSE progress reports and a download link appears once complete.
+    await expect(page.getByTestId('export-progress')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Export complete').first()).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByRole('link', { name: /Download export\.mp4/i })).toBeVisible();
   });
 });

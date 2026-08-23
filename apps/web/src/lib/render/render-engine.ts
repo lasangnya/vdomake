@@ -9,6 +9,7 @@ import {
   type RenderOptions,
 } from './filtergraph';
 import { compositeOverlays } from './overlay-compositor';
+import { buildAudioMix } from '@/lib/audio/music-mixer';
 import { logger } from '@vdomake/logger';
 
 const execFileAsync = promisify(execFile);
@@ -21,16 +22,30 @@ export interface RenderResult {
   frameCount: number;
 }
 
+export interface RenderAudioInput {
+  voiceoverPath?: string | null;
+  voiceoverOffsetMs?: number;
+  musicPath?: string | null;
+  musicSettings?: {
+    volume: number;
+    fadeInDuration: number;
+    fadeOutDuration: number;
+    loop: boolean;
+    duration: number;
+  } | null;
+  duckSegments?: Array<{ start: number; end: number }>;
+}
+
 /**
  * Renders the timed storyboard to an MP4: per-scene clips (zoompan + text
- * overlays) → xfade crossfades → voiceover mux. Uses the system FFmpeg.
+ * overlays) → xfade crossfades → audio mux (voiceover + optional music with
+ * ducking). Uses the system FFmpeg.
  */
 export async function renderVideo(
   scenes: RenderSceneSpec[],
   options: RenderOptions,
   outputDir: string,
-  voiceoverPath?: string | null,
-  audioOffsetMs = 0,
+  audio: RenderAudioInput = {},
   onProgress?: (stage: RenderStage, current: number, total: number) => void,
 ): Promise<RenderResult> {
   await mkdir(outputDir, { recursive: true });
@@ -108,21 +123,31 @@ export async function renderVideo(
   }
 
   const outputPath = path.join(outputDir, 'preview.mp4');
-  if (voiceoverPath) {
+  const hasVoiceover = Boolean(audio.voiceoverPath);
+  const musicSettings = audio.musicSettings ?? null;
+  const hasMusic = Boolean(audio.musicPath && musicSettings);
+  if (hasVoiceover || hasMusic) {
+    const mix = buildAudioMix(
+      audio.voiceoverOffsetMs ?? 0,
+      musicSettings,
+      audio.duckSegments ?? [],
+    );
+    const inputs = ['-y', '-i', silentPath];
+    if (hasVoiceover) inputs.push('-i', audio.voiceoverPath!);
+    if (hasMusic) inputs.push('-i', audio.musicPath!);
+    const filterParts = [mix.voiceoverFilter];
+    if (mix.musicFilter) filterParts.push(mix.musicFilter);
+    filterParts.push(mix.mix);
     await execFileAsync(
       'ffmpeg',
       [
-        '-y',
-        '-i',
-        silentPath,
-        '-i',
-        voiceoverPath,
+        ...inputs,
         '-filter_complex',
-        `[1:a]adelay=${audioOffsetMs}|${audioOffsetMs}[a]`,
+        filterParts.join(';'),
         '-map',
         '0:v',
         '-map',
-        '[a]',
+        '[aout]',
         '-c:v',
         'copy',
         '-c:a',

@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       codec: 'h264',
     };
     const job = await renderQueue.add('render-video', jobData, {
-      attempts: 1,
+      attempts: 3,
       removeOnComplete: 100,
       removeOnFail: 1000,
     });

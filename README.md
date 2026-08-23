@@ -61,10 +61,10 @@ artifact you review before moving on:
 | Phase | Input | Output | Status |
 |---|---|---|---|
 | **1. Capture** | A URL (public or localhost) | High-DPI screenshots + theme manifest | ✅ Built |
-| **2. Storyboard** | Screenshots + theme | Editable AI-proposed scene sequence | ⏳ Next |
-| **3. Voiceover** | Storyboard + audio | Transcribed, keyframe-tagged timing map | ⛔ Planned |
-| **4. Code Generation** | Timed storyboard | Motion Canvas project + preview render | ⛔ Planned |
-| **5. Timeline & Export** | Video project | Production MP4 / project zip | ⛔ Planned |
+| **2. Storyboard** | Screenshots + theme | Editable AI-proposed scene sequence | ✅ Built |
+| **3. Voiceover** | Storyboard + audio | Transcribed, keyframe-tagged timing map | ✅ Built |
+| **4. Code Generation** | Timed storyboard | Motion Canvas project + preview render | ✅ Built |
+| **5. Timeline & Export** | Video project | Production MP4 / project zip | ✅ Built |
 
 ---
 

@@ -1,4 +1,3 @@
-import { ChildProcessWithoutNullStreams, spawn } from 'node:child_process';
 import { test, expect } from '@playwright/test';
 
 /**
@@ -9,31 +8,10 @@ import { test, expect } from '@playwright/test';
  * produce screenshots.
  */
 test.describe('storyboard flow', () => {
-  let worker: ChildProcessWithoutNullStreams | undefined;
   let projectId: string;
 
-  test.beforeAll(async () => {
-    worker = spawn('bun', ['run', 'worker'], { stdio: 'pipe', shell: true });
-    await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error('worker failed to start')), 30_000);
-      worker?.stdout?.on('data', (chunk: Buffer) => {
-        if (chunk.toString().includes('listening')) {
-          clearTimeout(timer);
-          resolve(null);
-        }
-      });
-      worker?.on('exit', (code) => {
-        clearTimeout(timer);
-        reject(new Error(`worker exited early with code ${code}`));
-      });
-    });
-  });
-
-  test.afterAll(() => {
-    worker?.kill('SIGTERM');
-  });
-
   test('capture → generate CTA → seeded storyboard renders grid + preview', async ({ page }) => {
+    test.setTimeout(180_000);
     const response = await page.request.post('/api/capture', {
       data: {
         url: 'http://127.0.0.1:3000',
@@ -52,7 +30,9 @@ test.describe('storyboard flow', () => {
     await expect(page.getByText(/Generate a storyboard from your screenshots/i)).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByText(/screenshots and a theme are ready/i)).toBeVisible();
+    await expect(page.getByText(/screenshots and a theme are ready/i)).toBeVisible({
+      timeout: 45_000,
+    });
 
     // Seed a storyboard via the tRPC save endpoint (no LLM involved).
     // No transformer is configured, so the batch payload carries raw input

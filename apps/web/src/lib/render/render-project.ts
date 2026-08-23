@@ -1,17 +1,28 @@
 import path from 'node:path';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { audioTracks, captures, keyframes, projects, storyboards } from '@/lib/db/schema';
+import {
+  audioTracks,
+  backgroundMusic,
+  captures,
+  keyframes,
+  projects,
+  storyboards,
+} from '@/lib/db/schema';
 import { renderVideo, type RenderResult, type RenderStage } from './render-engine';
 import { exportsDir } from '@/lib/codegen/generate-service';
 import { UPLOADS_ROOT } from '@/lib/utils/uploads-path';
 import { screenshotToDiskPath } from '@/lib/ai/contact-sheet';
 import { computeAudioOffset } from '@/lib/codegen/audio-integrator';
+import { computeDuckSegments } from '@/lib/audio/music-mixer';
 import type { Scene } from '@/types/scene';
 import type { Keyframe } from '@/types/keyframe';
 
-const RESOLUTION = { width: 1920, height: 1080 };
-const FPS = 30;
+export interface RenderOptions {
+  width: number;
+  height: number;
+  fps: number;
+}
 
 /**
  * Loads a project's scenes + keyframes + audio and renders the preview video
@@ -19,15 +30,19 @@ const FPS = 30;
  */
 export async function renderProject(
   projectId: string,
+  options?: RenderOptions,
   onProgress?: (stage: RenderStage, current: number, total: number) => void,
   signal?: AbortSignal,
 ): Promise<RenderResult> {
-  const [storyboardRows, keyframeRows, captureRows, projectRows] = await Promise.all([
-    db.select().from(storyboards).where(eq(storyboards.projectId, projectId)).limit(1),
-    db.select().from(keyframes).where(eq(keyframes.projectId, projectId)),
-    db.select().from(captures).where(eq(captures.projectId, projectId)).orderBy(captures.order),
-    db.select().from(projects).where(eq(projects.id, projectId)).limit(1),
-  ]);
+  const [storyboardRows, keyframeRows, captureRows, projectRows, audioRows, musicRows] =
+    await Promise.all([
+      db.select().from(storyboards).where(eq(storyboards.projectId, projectId)).limit(1),
+      db.select().from(keyframes).where(eq(keyframes.projectId, projectId)),
+      db.select().from(captures).where(eq(captures.projectId, projectId)).orderBy(captures.order),
+      db.select().from(projects).where(eq(projects.id, projectId)).limit(1),
+      db.select().from(audioTracks).where(eq(audioTracks.projectId, projectId)).limit(1),
+      db.select().from(backgroundMusic).where(eq(backgroundMusic.projectId, projectId)).limit(1),
+    ]);
 
   const storyboard = storyboardRows[0];
   const project = projectRows[0];
@@ -54,22 +69,39 @@ export async function renderProject(
     };
   });
 
-  const audioRows = await db
-    .select()
-    .from(audioTracks)
-    .where(eq(audioTracks.projectId, projectId))
-    .limit(1);
   const voiceoverPath = audioRows[0]?.fileUrl
     ? screenshotToDiskPath(audioRows[0].fileUrl, UPLOADS_ROOT)
     : null;
-  const audioOffsetMs = Math.round(computeAudioOffset([...keyframeByScene.values()]) * 1000);
+  const voiceoverOffsetMs = Math.round(computeAudioOffset([...keyframeByScene.values()]) * 1000);
 
+  const music = musicRows[0];
+  const musicPath = music?.fileUrl ? screenshotToDiskPath(music.fileUrl, UPLOADS_ROOT) : null;
+  const duckSegments = audioRows[0]
+    ? computeDuckSegments(
+        (audioRows[0].transcript as { segments: Array<{ start: number; end: number }> }).segments,
+      )
+    : [];
+
+  const renderOptions = options ?? { width: 1920, height: 1080, fps: 30 };
   return renderVideo(
     specs,
-    { ...RESOLUTION, fps: FPS },
+    renderOptions,
     exportsDir(projectId),
-    voiceoverPath,
-    audioOffsetMs,
+    {
+      voiceoverPath,
+      voiceoverOffsetMs,
+      musicPath,
+      musicSettings: music
+        ? {
+            volume: music.volume,
+            fadeInDuration: music.fadeInDuration,
+            fadeOutDuration: music.fadeOutDuration,
+            loop: music.loop,
+            duration: music.duration,
+          }
+        : null,
+      duckSegments,
+    },
     (stage, current, total) => {
       if (signal?.aborted) return;
       onProgress?.(stage, current, total);

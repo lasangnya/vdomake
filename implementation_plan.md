@@ -1022,6 +1022,14 @@ gantt
 | **Phase 5** | 3 weeks | Timeline editor + production export |
 | **Total** | **~15 weeks** | |
 
+> **Status:** Phases 0–5 are **built** (see `README.md` for the live feature set).
+> Phase 5 shipped: multi-track timeline (`timeline-container`, `playback-controls`,
+> `mini-preview`, `transition-markers`), trim-via-drag-edges persisted to keyframes,
+> background music uploader with volume/fade/loop + automatic ducking
+> (`music-mixer.ts`), single/batch export (`/api/export` + SSE progress) at
+> 720p/1080p/4K in MP4/WebM, and the Motion Canvas project zip download
+> (`project-packager.ts`).
+
 ---
 
 ## CI / Quality Gates

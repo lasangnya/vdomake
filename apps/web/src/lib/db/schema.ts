@@ -93,6 +93,48 @@ export const keyframes = pgTable(
   ],
 );
 
+export const exportsTable = pgTable(
+  'exports',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    resolution: text('resolution').notNull(),
+    format: text('format').notNull().default('video'),
+    codec: text('codec').notNull().default('h264'),
+    frameRate: integer('frame_rate').notNull().default(30),
+    fileUrl: text('file_url'),
+    fileSize: integer('file_size'),
+    status: text('status').notNull().default('queued'),
+    progress: integer('progress').notNull().default(0),
+    isBatch: boolean('is_batch').notNull().default(false),
+    batchGroupId: text('batch_group_id'),
+    startedAt: timestamp('started_at', { withTimezone: true }),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('exports_project_id_idx').on(table.projectId)],
+);
+
+export const backgroundMusic = pgTable(
+  'background_music',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    fileUrl: text('file_url').notNull(),
+    duration: doublePrecision('duration').notNull().default(0),
+    volume: doublePrecision('volume').notNull().default(0.5),
+    fadeInDuration: doublePrecision('fade_in_duration').notNull().default(0),
+    fadeOutDuration: doublePrecision('fade_out_duration').notNull().default(0),
+    loop: boolean('loop').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('background_music_project_id_idx').on(table.projectId)],
+);
+
 export const providerKeys = pgTable(
   'provider_keys',
   {
@@ -153,3 +195,6 @@ export type AudioTrackRow = typeof audioTracks.$inferSelect;
 export type NewAudioTrack = typeof audioTracks.$inferInsert;
 export type KeyframeRow = typeof keyframes.$inferSelect;
 export type NewKeyframe = typeof keyframes.$inferInsert;
+export type ExportRow = typeof exportsTable.$inferSelect;
+export type NewExport = typeof exportsTable.$inferInsert;
+export type BackgroundMusicRow = typeof backgroundMusic.$inferSelect;

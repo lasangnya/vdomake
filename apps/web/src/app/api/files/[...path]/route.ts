@@ -19,6 +19,7 @@ const CONTENT_TYPES: Record<string, string> = {
   '.m4a': 'audio/mp4',
   '.mp4': 'video/mp4',
   '.webm': 'video/webm',
+  '.zip': 'application/zip',
 };
 
 /**

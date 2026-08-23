@@ -54,7 +54,8 @@ export interface RenderJobResult {
 
 export interface ExportJobData {
   projectId: string;
-  exportConfig: {
+  exportIds: string[];
+  config: {
     mode: 'single' | 'batch';
     format: 'video' | 'project';
     codec: 'h264' | 'webm';
@@ -62,6 +63,12 @@ export interface ExportJobData {
     frameRate: number;
     batchResolutions: Array<{ width: number; height: number }>;
   };
+}
+
+export interface ExportJobResult {
+  projectId: string;
+  exported: number;
+  urls: string[];
 }
 
 export interface AudioJobData {

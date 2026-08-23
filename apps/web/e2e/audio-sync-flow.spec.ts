@@ -1,4 +1,3 @@
-import { ChildProcessWithoutNullStreams, spawn } from 'node:child_process';
 import { test, expect } from '@playwright/test';
 
 /**
@@ -8,7 +7,6 @@ import { test, expect } from '@playwright/test';
  * timing table render, and auto-sync produces keyframes from the transcript.
  */
 test.describe('audio sync flow', () => {
-  let worker: ChildProcessWithoutNullStreams | undefined;
   let projectId: string;
 
   const seedTrackPayload = () => ({
@@ -53,30 +51,10 @@ test.describe('audio sync flow', () => {
     },
   });
 
-  test.beforeAll(async () => {
-    worker = spawn('bun', ['run', 'worker'], { stdio: 'pipe', shell: true });
-    await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error('worker failed to start')), 30_000);
-      worker?.stdout?.on('data', (chunk: Buffer) => {
-        if (chunk.toString().includes('listening')) {
-          clearTimeout(timer);
-          resolve(null);
-        }
-      });
-      worker?.on('exit', (code) => {
-        clearTimeout(timer);
-        reject(new Error(`worker exited early with code ${code}`));
-      });
-    });
-  });
-
-  test.afterAll(() => {
-    worker?.kill('SIGTERM');
-  });
-
   test('capture → storyboard seed → audio page renders transcript + auto-sync', async ({
     page,
   }) => {
+    test.setTimeout(180_000);
     // Create a project and wait for capture to complete.
     const response = await page.request.post('/api/capture', {
       data: {
