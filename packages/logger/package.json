@@ -13,7 +13,8 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "pino": "catalog:"
+    "pino": "catalog:",
+    "pino-pretty": "catalog:"
   },
   "devDependencies": {
     "@vdomake/config": "workspace:*",
