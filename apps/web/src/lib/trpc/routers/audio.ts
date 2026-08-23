@@ -13,7 +13,7 @@ export const audioRouter = {
   /** Loads the audio track + keyframes for a project (null when no upload yet). */
   get: publicProcedure
     .input(z.object({ projectId: z.string().uuid() }))
-    .query(async ({ ctx, input }) => getAudioState(input.projectId)),
+    .query(async ({ input }) => getAudioState(input.projectId)),
 
   /** Saves an audio track (fileUrl + duration + transcript) — used after upload. */
   saveTrack: publicProcedure

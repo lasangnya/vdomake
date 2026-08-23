@@ -7,7 +7,7 @@ import { db } from '@/lib/db';
 import { projects } from '@/lib/db/schema';
 import { resolveUploadPath } from '@/lib/utils/uploads-path';
 import { buildRouter } from '@/lib/trpc/context';
-import { transcribeAudio, validateAudioFile } from '@/lib/audio/transcription';
+import { validateAudioFile } from '@/lib/audio/transcription';
 import { autoSyncKeyframes, persistTrack } from '@/lib/audio/audio-service';
 import { toErrorResponse, throwApiError } from '@/lib/utils/api-error';
 import { logger } from '@vdomake/logger';
