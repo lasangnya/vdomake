@@ -11,11 +11,13 @@ export {
   sceneSchema,
   textOverlaySchema,
   storyboardSchema,
+  storyboardSaveInputSchema,
   type SceneInput,
   type StoryboardInput,
 } from "./scene.schema";
 export {
   keyframeSchema,
+  keyframeInputSchema,
   audioTrackSchema,
   autoSyncSuggestionSchema,
   type KeyframeInput,

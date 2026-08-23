@@ -51,3 +51,16 @@ export const storyboardSchema = z.object({
 
 export type SceneInput = z.infer<typeof sceneSchema>;
 export type StoryboardInput = z.infer<typeof storyboardSchema>;
+
+/**
+ * Storyboard payload as submitted by the client (no DB id). Explicit shape to
+ * avoid `.omit()` on a schema containing refinements (scenes.min(1)).
+ */
+export const storyboardSaveInputSchema = z.object({
+  projectId: z.string().min(1),
+  scenes: z
+    .array(sceneSchema)
+    .min(1, "Storyboard must contain at least one scene"),
+  version: z.number().int().nonnegative().default(1),
+  status: z.enum(["draft", "finalized"]).default("draft"),
+});

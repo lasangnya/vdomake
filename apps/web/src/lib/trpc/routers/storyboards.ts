@@ -3,7 +3,7 @@ import { desc, eq } from 'drizzle-orm';
 import { TRPCError } from '@trpc/server';
 import { captures, projects, storyboards, type StoryboardRow } from '@/lib/db/schema';
 import { generateStoryboard } from '@/lib/ai/storyboard-agent';
-import { storyboardSchema } from '@vdomake/validators';
+import { storyboardSaveInputSchema } from '@vdomake/validators';
 import { publicProcedure } from '../context';
 import { logger } from '@vdomake/logger';
 import type { Scene, Storyboard } from '@/types/scene';
@@ -119,7 +119,7 @@ export const storyboardRouter = {
     .input(
       z.object({
         projectId: z.string().uuid(),
-        storyboard: storyboardSchema.omit({ id: true }),
+        storyboard: storyboardSaveInputSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {

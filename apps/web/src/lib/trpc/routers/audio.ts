@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { audioTrackSchema, keyframeSchema } from '@vdomake/validators';
+import { audioTrackSchema, keyframeInputSchema } from '@vdomake/validators';
 import {
   autoSyncKeyframes,
   getAudioState,
@@ -37,7 +37,7 @@ export const audioRouter = {
     .input(
       z.object({
         projectId: z.string().uuid(),
-        keyframes: z.array(keyframeSchema.omit({ id: true, projectId: true })).max(50),
+        keyframes: z.array(keyframeInputSchema).max(50),
       }),
     )
     .mutation(async ({ input }) => {
