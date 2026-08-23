@@ -41,6 +41,22 @@ export const captures = pgTable(
   (table) => [index('captures_project_id_idx').on(table.projectId)],
 );
 
+export const storyboards = pgTable(
+  'storyboards',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    scenes: jsonb('scenes').notNull(),
+    version: integer('version').notNull().default(1),
+    status: text('status').notNull().default('draft'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('storyboards_project_id_idx').on(table.projectId)],
+);
+
 export const providerKeys = pgTable(
   'provider_keys',
   {
@@ -95,3 +111,5 @@ export type UsageLog = typeof usageLogs.$inferSelect;
 export type ProjectRow = typeof projects.$inferSelect;
 export type NewProject = typeof projects.$inferInsert;
 export type CaptureRow = typeof captures.$inferSelect;
+export type StoryboardRow = typeof storyboards.$inferSelect;
+export type NewStoryboard = typeof storyboards.$inferInsert;
